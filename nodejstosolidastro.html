@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Migration Script Generator</title>
+
+    <!-- The entire app's styling is embedded here -->
+    <style>
+        :root {
+            --background-color: #0A0A0A;
+            --text-color: #EAEAEA;
+            --text-color-subtle: #A0A0A0;
+            --border-color: #2A2A2A;
+            --accent-color: #00E0FF;
+            --highlight-bg: #1A1A1A;
+            --error-color: #ff3b3b;
+            --warning-color: #ffcc00;
+        }
+
+        *, *:before, *:after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--background-color);
+            background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMCIgaGVpZ2h0PSIzMCI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iIzBhMGEwYSIvPjxwYXRoIGQ9Ik0gMTUgMCBMIDE1IDMwIE0gMC AxNSBMIDMwIDE1IiBzdHJva2U9IiMxNDE0MTQiIHN0cm9rZS13aWR0aD0iMSIvPjwvc3ZnPg==');
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            font-size: 1.1rem;
+            color: var(--text-color-subtle);
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .input-field, .textarea-field {
+            width: 100%;
+            background: var(--highlight-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 1rem;
+            border-radius: 4px;
+            font-size: 1rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        
+        .input-field:focus, .textarea-field:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px rgba(0, 224, 255, 0.2);
+        }
+
+        .textarea-field {
+            font-family: 'Courier New', Courier, monospace;
+            resize: vertical;
+            min-height: 300px;
+        }
+
+        .action-button {
+            background-color: var(--accent-color);
+            color: #000;
+            font-weight: 700;
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1.2rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            margin-top: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .action-button:hover:not(:disabled) {
+            filter: brightness(1.2);
+            transform: translateY(-2px);
+        }
+        
+        .action-button:disabled {
+            background-color: var(--border-color);
+            color: var(--text-color-subtle);
+            cursor: not-allowed;
+        }
+
+        .output-container {
+            margin-top: 3rem;
+            padding-top: 3rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .code-block-wrapper {
+            margin: 1.5rem 0;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: #000;
+        }
+
+        .code-block-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem 1.5rem;
+            background-color: var(--border-color);
+        }
+        
+        .code-block-language {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            color: var(--text-color-subtle);
+            letter-spacing: 0.05em;
+        }
+
+        .code-block-copy-button {
+            background: none;
+            border: 1px solid var(--text-color-subtle);
+            color: var(--text-color-subtle);
+            font-size: 0.9rem;
+            padding: 0.3rem 0.8rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .code-block-copy-button:hover {
+            background: var(--highlight-bg);
+            color: var(--accent-color);
+            border-color: var(--accent-color);
+        }
+        
+        .code-block-pre {
+            padding: 1.5rem;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            color: #EAEAEA;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+        
+        .message-box {
+            border: 1px solid;
+            padding: 1.5rem;
+            border-radius: 4px;
+            margin-bottom: 2rem;
+            font-size: 1rem;
+        }
+        
+        .message-box.error {
+            background-color: rgba(255, 59, 59, 0.1);
+            border-color: var(--error-color);
+            color: var(--error-color);
+        }
+        
+        .message-box.warning {
+            background-color: rgba(255, 204, 0, 0.1);
+            border-color: var(--warning-color);
+            color: var(--warning-color);
+        }
+        
+        .message-box strong {
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 700;
+        }
+        
+        .loader-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem;
+            text-align: center;
+        }
+
+        .loader-spinner {
+            animation: spin 1s linear infinite;
+            height: 3rem;
+            width: 3rem;
+            color: var(--accent-color);
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .loader-message {
+            margin-top: 1.5rem;
+            font-size: 1rem;
+            color: var(--text-color-subtle);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        [hidden] {
+            display: none !important;
+        }
+    </style>
+
+    <!-- Use an import map to load the Gemini library directly in the browser -->
+    <script type="importmap">
+    {
+      "imports": {
+        "@google/genai": "https://esm.sh/@google/genai@^0.14.2"
+      }
+    }
+    </script>
+</head>
+<body>
+
+    <main class="container">
+        <header>
+            <h1>AI-Powered Migration Script Generator</h1>
+            <p>Paste your project's directory tree below to generate a custom Node.js script that automates the migration to Astro/SolidJS.</p>
+        </header>
+
+        <div class="input-group">
+            <label for="apiKey">Your Gemini API Key</label>
+            <input type="password" id="apiKey" class="input-field" placeholder="Enter your key here...">
+             <div class="message-box warning" style="margin-top: 1rem; margin-bottom: 0; padding: 1rem;"><strong>Notice:</strong> Your API key is used directly in the browser and is not stored. For production applications, always handle API keys on a secure backend.</div>
+        </div>
+
+        <div class="input-group">
+            <label for="projectStructure">Project Directory Structure</label>
+             <p style="color: var(--text-color-subtle); margin-bottom: 0.5rem;">Run <code style="background: #333; padding: 2px 5px; border-radius: 3px;">tree -d</code> or <code style="background: #333; padding: 2px 5px; border-radius: 3px;">ls -R</code> in your project terminal and paste the output here.</p>
+            <textarea id="projectStructure" class="textarea-field" placeholder="my-node-app/&#10;├── src/&#10;│   ├── components/&#10;│   └── routes/&#10;├── public/&#10;└── package.json"></textarea>
+        </div>
+        
+        <button id="generateButton" class="action-button">Generate Automation Script</button>
+
+        <div id="loader" class="loader-container" hidden>
+            <svg class="loader-spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <p class="loader-message">Building your custom migration script with AI...</p>
+        </div>
+        
+        <div id="errorMessage" class="message-box error" hidden></div>
+
+        <div id="outputContainer" class="output-container" hidden>
+             <div class="message-box warning">
+                <strong>Disclaimer:</strong> This generated script is a powerful starting point, but it is not a replacement for manual review and testing. **Always back up your project before running any automation script.** Review the script carefully to understand its actions before executing it.
+            </div>
+            <div class="code-block-wrapper">
+                <div class="code-block-header">
+                    <span class="code-block-language">javascript</span>
+                    <button id="copyButton" class="code-block-copy-button">Copy Script</button>
+                </div>
+                <pre class="code-block-pre"><code id="scriptOutput"></code></pre>
+            </div>
+        </div>
+    </main>
+
+    <!-- The entire app's logic is embedded here -->
+    <script type="module">
+        import { GoogleGenerativeAI } from "@google/genai";
+
+        // --- DOM Element References ---
+        const generateButton = document.getElementById('generateButton');
+        const apiKeyInput = document.getElementById('apiKey');
+        const projectStructureInput = document.getElementById('projectStructure');
+        const loader = document.getElementById('loader');
+        const outputContainer = document.getElementById('outputContainer');
+        const scriptOutput = document.getElementById('scriptOutput');
+        const errorMessage = document.getElementById('errorMessage');
+        const copyButton = document.getElementById('copyButton');
+        
+        // --- Core Logic ---
+        async function handleGeneration() {
+            const apiKey = apiKeyInput.value.trim();
+            const projectStructure = projectStructureInput.value.trim();
+
+            // 1. Validation
+            if (!apiKey) {
+                showError("Please enter your Gemini API Key.");
+                return;
+            }
+            if (!projectStructure) {
+                showError("Please paste your project's directory structure.");
+                return;
+            }
+
+            // 2. Set UI to loading state
+            setLoading(true);
+
+            try {
+                const genAI = new GoogleGenerativeAI(apiKey);
+                const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+                // 3. Define the Powerful System Prompt
+                const systemInstruction = `You are an expert developer specializing in creating command-line interface (CLI) tools with Node.js. Your task is to generate a complete, runnable Node.js script that automates the migration of a project from a legacy structure to a modern Astro/SolidJS setup, ready for Cloudflare deployment. The user has provided their project's file structure. Your generated script should be tailored to that specific structure.
+
+**Script Requirements:**
+
+1.  **Language & Style:**
+    *   Use modern JavaScript (ESM: \`import\`/\`export\`).
+    *   The script must be a single file, executable with \`node your-script-name.js\`.
+    *   It **must** use \`inquirer\` for user prompts, \`chalk\` for colored console output, and \`fs-extra\` for robust file system operations.
+    *   At the top of the script, in a comment, explain the prerequisites: \`// To run this script, first install dependencies: npm install inquirer chalk fs-extra\`.
+    *   The code must be well-commented, clean, and easy to understand.
+
+2.  **Functionality:**
+    *   **User Input:** Prompt the user for the new target directory name and the Cloudflare project name using \`inquirer\`.
+    *   **Project Scaffolding:** Execute shell commands (\`child_process.execSync\`) to create the new Astro project (\`npm create astro@latest\`) and install integrations (\`@astrojs/solid-js\`, \`@astrojs/cloudflare\`).
+    *   **File Migration:** Based on the user's provided project structure, intelligently map old files to new locations and use \`fs-extra\` to copy them. For messy structures, make logical assumptions (e.g., files under a 'components' folder are components, files under 'routes/api' are API endpoints).
+    *   **Code Conversion (Placeholders):** The script should **NOT** attempt a full code conversion. Instead, for each copied file, it should insert **// TODO:** comments indicating what needs to be manually changed. For example, in a React component, add \`// TODO: Convert React hooks (useState, useEffect) to SolidJS signals (createSignal, createEffect).\`. For an Express route, create a new Astro API route file with boilerplate and add a comment \`// TODO: Port the business logic from the original Express route file here.\`. This is a safer and more realistic approach.
+    *   **Configuration:** Generate the \`astro.config.mjs\` and \`wrangler.toml\` files with the correct configurations, using the user's \`inquirer\` input to populate values.
+    *   **Logging:** Use \`chalk\` to provide clear, step-by-step feedback in the console.
+
+3.  **Final Output:**
+    *   Conclude by printing clear "Next Steps" for the user, emphasizing the manual code conversion work that remains.
+
+Now, generate the complete Node.js script based on these requirements and the provided structure. Start the response **directly** with the script code block. Do not add any conversational preamble or markdown fences like \`\`\`javascript. Just the raw code.`;
+                
+                const prompt = `Generate the migration script for this project structure:\n\n${projectStructure}`;
+                
+                // 4. Call the API and stream the response
+                const result = await model.generateContentStream({
+                    contents: [{ role: "user", parts: [{ text: prompt }] }],
+                    systemInstruction: { parts: [{ text: systemInstruction }] },
+                });
+
+                // 5. Render the stream in real-time
+                scriptOutput.textContent = ''; // Clear previous output
+                for await (const chunk of result.stream) {
+                    const chunkText = chunk.text();
+                    scriptOutput.textContent += chunkText;
+                }
+
+                setLoading(false, true); // Show output after loading
+            } catch (err) {
+                console.error(err);
+                showError("Failed to generate script. Check your API key and the console for more details. Error: " + err.message);
+                setLoading(false);
+            }
+        }
+        
+        // --- UI Helper Functions ---
+        function setLoading(isLoading, isSuccess = false) {
+            loader.hidden = !isLoading;
+            generateButton.disabled = isLoading;
+            
+            // Only hide output/error if we are starting to load
+            if (isLoading) {
+                outputContainer.hidden = true;
+                errorMessage.hidden = true;
+            } else if (isSuccess) {
+                outputContainer.hidden = false;
+            }
+        }
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.hidden = false;
+        }
+
+        function copyScriptToClipboard() {
+            const code = scriptOutput.textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                copyButton.textContent = 'Copied!';
+                setTimeout(() => {
+                    copyButton.textContent = 'Copy Script';
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+            });
+        }
+        
+        // --- Event Listeners ---
+        generateButton.addEventListener('click', handleGeneration);
+        copyButton.addEventListener('click', copyScriptToClipboard);
+
+    </script>
+
+</body>
+</html>
